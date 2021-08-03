@@ -1,0 +1,6 @@
+delim:;
+# TODO don't hardcode username
+# TODO add more dispatch rules
+.config/i3/config;/home/fading/.config/i3/config
+.zshrc;/home/fading/.zshrc
+.fehbg;/home/fading/.fehbg

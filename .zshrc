@@ -1,56 +1,85 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
+# The following lines were added by compinstall
 
-# Path to your oh-my-zsh installation.
-  export ZSH="/home/niklas/.oh-my-zsh"
+zstyle ':completion:*' auto-description 'specify %d'
+zstyle ':completion:*' completer _expand _complete _ignored _correct _approximate
+zstyle ':completion:*' format '%F{magenta}Completing %d%f'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' insert-unambiguous true
+zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' list-suffixes true
+zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]} m:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' menu select=long
+zstyle ':completion:*' original false
+zstyle ':completion:*' preserve-prefix '//[^/]##/'
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle :compinstall filename '/home/fading/.zshrc'
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="agnoster"
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+# Lines configured by zsh-newuser-install
+HISTFILE=~/.histfile
+HISTSIZE=10000
+SAVEHIST=10000
+setopt autocd extendedglob nomatch
+unsetopt beep notify
+bindkey -v
+# End of lines configured by zsh-newuser-install
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+# aliases
+alias ls="ls --color=auto"
+alias grep="grep --color=auto"
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+autoload -Uz promptinit
+promptinit
+# prompt suse
 
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
+# TODO custom prompt with retval, vimode, user, hostname, (full) path, git stuff and colors
+# function vimode {
+# 	VIMODE="${${KEYMAP/vicmd/-N-}/(main|viins)/-I-}"
+# 	zle reset-prompt
+# }
+# zle -N vimode
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
+zle-keymap-select () {
+	case $KEYMAP in
+		visual) VIMODE="-V-";;
+		(viins|main)) VIMODE="-I-";;
+		vicmd) VIMODE="-N-";;
+	esac
 
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
+	zle reset-prompt
+}
 
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
+zle -N zle-keymap-select
 
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
+function precmd() {
+	RETVAL=$?
+	VIMODE="-I-"
 
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
+	# TODO this only works if in the git directory; not in any child directories
+	if [ -d .git ]; then
+		GITBRANCH=`git branch -v | sed -E "s/\* ([^ ]*) .*/\1/g"`
+	else
+		GITBRANCH=''
+	fi;
 
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
+	if [ $RETVAL = 0 ]; then
+		RETVAL_STR=""
+	else
+		RETVAL_STR="%F{red}(${RETVAL})%f"
+	fi
+}
 
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
+setprompt () {
+	setopt prompt_subst
 
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
+	PROMPT='${RETVAL_STR}[%F{cyan}%n%f@%m : %(4~|.../%3~|%~) %F{red}${GITBRANCH}%f][${VIMODE}] $ '
+}
+
+setprompt
+ications,
 # see 'man strftime' for details.
 # HIST_STAMPS="mm/dd/yyyy"
 

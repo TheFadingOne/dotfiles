@@ -1,0 +1,4 @@
+#!/bin/sh
+
+bgimg=`find ~/Pictures/background_images -type f | shuf -n 1`
+feh --no-fehbg --bg-scale $bgimg
