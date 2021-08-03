@@ -4,8 +4,11 @@ pub mod dispatch_rules {
     use std::io::BufReader;
     use std::fs::{File, OpenOptions};
     use std::fmt::{self, Display, Formatter};
+    use std::borrow::Borrow;
 
     use termion::color;
+
+    use shellexpand::full;
 
     pub struct DispatchRules(pub Vec<(String, String)>);
 
@@ -26,7 +29,26 @@ pub mod dispatch_rules {
 
         // writes from the file at scr_name to the file at dst_name bs bytes at a time
         fn write_from_into(src_name: &str, dst_name: &str, bs: usize) {
-            let mut src = match OpenOptions::new().read(true).open(src_name) {
+            // expand shell variables and ~ in the paths
+            let src_name = match full(src_name) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("{}warning{}: while expanding \"{}\": \"{}\"",
+                              color::Fg(color::LightYellow), color::Fg(color::Reset), src_name, e);
+                    return;
+                }
+            };
+            let dst_name = match full(dst_name) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("{}warning{}: while expanding \"{}\": \"{}\"",
+                              color::Fg(color::LightYellow), color::Fg(color::Reset), dst_name, e);
+                    return;
+                }
+            };
+
+            // Open source and destination files
+            let mut src = match OpenOptions::new().read(true).open(src_name.borrow() as &str) {
                 Ok(f) => f,
                 Err(e) => {
                     eprintln!("{}warning{}: while opening \"{}\": \"{}\"",
@@ -34,7 +56,7 @@ pub mod dispatch_rules {
                     return;
                 },
             };
-            let mut dst = match OpenOptions::new().write(true).create(true).open(dst_name) {
+            let mut dst = match OpenOptions::new().truncate(true).write(true).create(true).open(dst_name.borrow() as &str) {
                 Ok(f) => f,
                 Err(e) => {
                     eprintln!("{}warning{}: while opening \"{}\": \"{}\"",
@@ -44,9 +66,11 @@ pub mod dispatch_rules {
             };
 
             // TODO there must be an easier way to do this
+            // create temporary buffer of size bs
             let mut buf = vec![];
             buf.resize_with(bs, || 0);
         
+            // copy file
             loop {
                 match src.read(&mut buf) {
                     Ok(0) => break,
@@ -67,6 +91,7 @@ pub mod dispatch_rules {
         }
     }
 
+    // TODO this can be removed
     impl Display for DispatchRules {
         fn fmt(&self, f: &mut Formatter) -> fmt::Result {
             for (src, dst) in &self.0 {
