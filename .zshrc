@@ -57,13 +57,21 @@ zle -N zle-keymap-select
 function precmd() {
 	RETVAL=$?
 	VIMODE="-I-"
+	GITBRANCH=''
 
-	# TODO this only works if in the git directory; not in any child directories
-	if [ -d .git ]; then
-		GITBRANCH=`git branch -v | sed -E "s/\* ([^ ]*) .*/\1/g"`
+	if git rev-parse --git-dir > /dev/null 2>&1; then
+		GITBRANCH=`git branch -v | sed -E "s/\*\s(\S*)\s.*/\1/g"`
+
+		# TODO this relies on git's output not changing aka bad idea
+		# TODO there has to be a better way
+		if git status | grep -E "nothing to commit, working tree clean" > /dev/null 2>&1; then
+			GITINFO=''
+		else
+			GITINFO='*'
+		fi
 	else
 		GITBRANCH=''
-	fi;
+	fi
 
 	if [ $RETVAL = 0 ]; then
 		RETVAL_STR=""
@@ -75,7 +83,7 @@ function precmd() {
 setprompt () {
 	setopt prompt_subst
 
-	PROMPT='${RETVAL_STR}[%F{cyan}%n%f@%m : %(4~|.../%3~|%~) %F{red}${GITBRANCH}%f][${VIMODE}] $ '
+	PROMPT='${RETVAL_STR}[%F{cyan}%n%f@%m : %(4~|.../%3~|%~) %F{red}${GITBRANCH}%f${GITINFO}][${VIMODE}] $ '
 }
 
 setprompt
