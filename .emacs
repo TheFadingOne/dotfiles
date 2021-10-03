@@ -1,3 +1,13 @@
+;; Melpa stuff
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+;; Install use-package if not intsalled
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
 (eval-when-compile
   (require 'use-package))
 
@@ -8,7 +18,8 @@
 (windmove-default-keybindings)
 (setq inferior-lisp-program "/usr/bin/sbcl")
 (add-to-list 'load-path "/usr/share/emacs/site-lisp/slime")
-(require 'slime)
+(use-package slime
+  :ensure t)
 (slime-setup)
 
 ;; TODO initialization
@@ -20,29 +31,36 @@
 
 ;; general stuff
 (global-display-line-numbers-mode)
-(setq display-line-numbers 'relative)
+(setq-default display-line-numbers-type 'relative)
 
-;; Melpa stuff
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
+;; Install packages
+(use-package rust-mode
+  :ensure t)
+
+(use-package cider
+  :ensure t)
+
+(use-package clojure-mode
+  :ensure t)
+
+(use-package company
+  :ensure t)
 
 ;; Lsp stuff
-;; (setq lsp-keymap-prefix "s-l")
-
-;; (require 'lsp-mode)
-;; (add-hook 'lisp-mode-hook #'lsp)
-;; (add-hook 'rust-mode-hook #'lsp)
 (use-package lsp-mode
+  :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l")
   :hook (
 	 ;; (lisp-mode . lsp)
 	 (rust-mode . lsp)
+	 (clojure-mode . lsp)
 	 (lsp-mode . lsp-enable-which-key-integration)) ; do I need that?
   :commands lsp)
 
-(use-package lsp-ui :commands lsp-ui-mode)
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
 
 ;; Autocreated stuff
 (custom-set-variables
