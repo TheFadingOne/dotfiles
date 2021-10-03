@@ -3,3 +3,4 @@ delim:;
 .config/i3/config;~/.config/i3/config
 .zshrc;~/.zshrc
 .fehbg;~/.fehbg
+.emacs;~/.emacs
