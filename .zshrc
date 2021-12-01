@@ -28,8 +28,11 @@ bindkey -v
 # End of lines configured by zsh-newuser-install
 
 # aliases
+# TODO put aliases in different file
 alias ls="ls --color=auto"
 alias grep="grep --color=auto"
+alias ru="setxkbmap ru"
+alias эн="setxkbmap us"
 
 autoload -Uz promptinit
 promptinit
