@@ -40,9 +40,28 @@
 (setq custom-tab-width 8)
 (setq-default tab-width 8)
 
-(setq-default c-default-style "ellementel"
-              c-basic-offset 8
-              indent-tabs-mode nil)
+(c-add-style "fading-tabs"
+             '("k&r"
+               (c-basic-offset . 8)
+               (tab-width . 8)
+               (indent-tabs-mode . t)
+               (c-indent-tabs-mode . t)
+               (c-indent-level . 8)
+               (c-argdecl-indent . 0)
+               (c-tab-always-indent . t)
+               (backward-delete-function . nil)
+               (c-offsets-alist
+                (substatement-open . 0)
+                (case-label . 0)
+                (func-decl-cont . 0)
+                (inline-open . 0)
+                (cpp-macro . 0))))
+
+(c-add-style "fading-spaces"
+             '("fading-tabs"
+               (indent-tabs-mode . nil)))
+
+(setq c-default-style "fading-tabs")
 
 (defun disable-tabs () (setq indent-tabs-mode nil))
 (defun enable-tabs ()
