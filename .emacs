@@ -78,6 +78,10 @@
 
 (setq whitespace-style '(face tabs tab-mark trailling))
 (custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(whitespace-tab ((t (:foreground "#636363")))))
 (setq whitespace-display-mappings
       '((tab-mark 9 [124 9] [92 9])))
@@ -93,8 +97,8 @@
 (use-package rust-mode
   :ensure t)
 
-;; (use-package d-mode
-;;   :ensure t)
+(use-package d-mode
+  :ensure t)
 
 (use-package cider
   :ensure t)
@@ -105,31 +109,59 @@
 (use-package company
   :ensure t)
 
+(use-package idris-mode
+  :ensure t)
+
 ;; Lsp stuff
 (use-package lsp-java
   :ensure t
   :hook (java-mode . lsp))
+
+(use-package jupyter
+  :ensure t)
+
+(use-package scala-mode
+  :ensure t
+  :interpreter ("scala3" . scala-mode))
+
+(use-package sbt-mode
+  :ensure t
+  :commands sbt-start sbt-command)
+
+(use-package lsp-metals
+  :ensure t
+  :custom
+  (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off")))
+
+(use-package haskell-mode
+  :ensure t)
 
 (use-package lsp-mode
   :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l")
   :hook (
-	 ;; (lisp-mode . lsp)
-	 (c-mode . lsp)
-	 (c++-mode . lsp)
-	 (d-mode . lsp)
-	 (rust-mode . lsp)
-	 (clojure-mode . lsp)
-	 (lsp-mode . lsp-enable-which-key-integration)) ; do I need that?
+         ;; (lisp-mode . lsp)
+         (c-mode . lsp)
+         (c++-mode . lsp)
+         (d-mode . lsp)
+         (rust-mode . lsp)
+         (clojure-mode . lsp)
+         (scala-mode . lsp)
+         (haskell-mode . lsp)
+         (haskell-literate-mode . lsp)
+         (lsp-mode . lsp-enable-which-key-integration)) ; do I need that?
   :commands lsp)
+
+(use-package lsp-haskell
+  :ensure t)
 
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode)
 
 (use-package helm-lsp
-;;  :ensure t
+  :ensure t
   :commands helm-lsp-workspace-symbol)
 
 (use-package lsp-ivy
@@ -137,7 +169,7 @@
   :commands lsp-ivy-workspace-symbol)
 
 (use-package lsp-treemacs
-;;  :ensure t
+  :ensure t
   :commands lsp-treemacs-error-list)
 
 ;; TODO dap-mode
@@ -146,3 +178,10 @@
   :ensure t
   :config
   (which-key-mode))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(raku-mode multiple-cursors idris-mode d-mode which-key use-package slime-repl-ansi-color rust-mode memoize lsp-ui lsp-java lsp-ivy flycheck company cider async)))
