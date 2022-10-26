@@ -1,7 +1,7 @@
 mod lib;
 
 use std::fs::File;
-use std::process;
+use std::process::ExitCode;
 use std::convert::TryFrom;
 use std::io::Write;
 
@@ -11,7 +11,7 @@ use lib::dispatch_rules::DispatchRules;
 
 // TODO improve error handling
 
-fn main() {
+fn main() -> ExitCode {
     let matches = App::new("Dispatcher")
             .about("Dispatches or updates files")
             .arg(Arg::with_name("update")
@@ -33,7 +33,8 @@ fn main() {
         Ok(f) => f,
         Err(e) => {
             eprintln!("error: {}", e);
-            process::exit(1);
+            // process::exit(1);
+            return ExitCode::from(1);
         },
     };
 
@@ -51,11 +52,13 @@ fn main() {
     let mut input = String::new();
     if let Err(e) = std::io::stdin().read_line(&mut input) {
         eprintln!("error: unable to read user input: \"{}\"", e);
-        process::exit(1);
+        // process::exit(1);
+        return ExitCode::from(1);
     }
 
     if &input.to_lowercase() != "y\n" {
-        process::exit(2);
+        // process::exit(2);
+        return ExitCode::from(2);
     }
 
     if update {
@@ -64,5 +67,6 @@ fn main() {
         dr.dispatch(1024);
     }
 
-    process::exit(0);
+    // process::exit(0);
+    ExitCode::SUCCESS
 }
