@@ -27,12 +27,17 @@ unsetopt beep notify
 bindkey -v
 # End of lines configured by zsh-newuser-install
 
+# set PATH
+# export PATH=$(echo -n $PATH : ~/programs/bin : ~/.local/share/coursier/bin | tr -d ' ')
+export PATH=$(echo -n $PATH : ~/programs/bin : ~/.cargo/bin | tr -d ' ')
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.cache"
+# export VIMRUNTIME=$(nvim --clean --headless --cmd 'echo $VIMRUNTIME|q')
+
 # aliases
-# TODO put aliases in different file
 alias ls="ls --color=auto"
 alias grep="grep --color=auto"
-alias ru="setxkbmap ru"
-alias эн="setxkbmap us"
 
 autoload -Uz promptinit
 promptinit
@@ -63,7 +68,7 @@ function precmd() {
 	GITBRANCH=''
 
 	if git rev-parse --git-dir > /dev/null 2>&1; then
-		GITBRANCH=`git branch -v | sed -E "s/\*\s(\S*)\s.*/\1/g"`
+		GITBRANCH=`git branch -v | sed -nE "s/\*\s(\S*)\s.*/\1/p"`
 
 		# TODO this relies on git's output not changing aka bad idea
 		# TODO there has to be a better way
@@ -74,6 +79,7 @@ function precmd() {
 		fi
 	else
 		GITBRANCH=''
+		GITINFO=''
 	fi
 
 	if [ $RETVAL = 0 ]; then
