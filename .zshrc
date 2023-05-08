@@ -24,62 +24,24 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt autocd extendedglob nomatch
 unsetopt beep notify
-bindkey -v
+bindkey -e
 # End of lines configured by zsh-newuser-install
-
-# set PATH
-# export PATH=$(echo -n $PATH : ~/programs/bin : ~/.local/share/coursier/bin | tr -d ' ')
-export PATH=$(echo -n $PATH : ~/programs/bin : ~/.cargo/bin | tr -d ' ')
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.cache"
-# export VIMRUNTIME=$(nvim --clean --headless --cmd 'echo $VIMRUNTIME|q')
 
 # aliases
 alias ls="ls --color=auto"
 alias grep="grep --color=auto"
 
-autoload -Uz promptinit
-promptinit
-# prompt suse
-
-# TODO custom prompt with retval, vimode, user, hostname, (full) path, git stuff and colors
-# function vimode {
-# 	VIMODE="${${KEYMAP/vicmd/-N-}/(main|viins)/-I-}"
-# 	zle reset-prompt
-# }
-# zle -N vimode
-
-zle-keymap-select () {
-	case $KEYMAP in
-		visual) VIMODE="-V-";;
-		(viins|main)) VIMODE="-I-";;
-		vicmd) VIMODE="-N-";;
-	esac
-
-	zle reset-prompt
-}
-
-zle -N zle-keymap-select
-
 function precmd() {
 	RETVAL=$?
-	VIMODE="-I-"
 	GITBRANCH=''
+	GITINFO=''
 
-	if git rev-parse --git-dir > /dev/null 2>&1; then
-		GITBRANCH=`git branch -v | sed -nE "s/\*\s(\S*)\s.*/\1/p"`
+	if type git 2> /dev/null 1> /dev/null && git rev-parse 2> /dev/null 1> /dev/null ; then
+		GITBRANCH="$(git rev-parse --abbrev-ref HEAD)($(git rev-parse --short HEAD))"
 
-		# TODO this relies on git's output not changing aka bad idea
-		# TODO there has to be a better way
-		if git status | grep -E "nothing to commit, working tree clean" > /dev/null 2>&1; then
-			GITINFO=''
-		else
-			GITINFO='*'
-		fi
-	else
-		GITBRANCH=''
-		GITINFO=''
+		if [[ -n $(git status --short) ]]; then
+                        GITINFO="*"
+                fi
 	fi
 
 	if [ $RETVAL = 0 ]; then
@@ -92,7 +54,7 @@ function precmd() {
 setprompt () {
 	setopt prompt_subst
 
-	PROMPT='${RETVAL_STR}[%F{cyan}%n%f@%m : %(4~|.../%3~|%~) %F{red}${GITBRANCH}%f${GITINFO}][${VIMODE}] $ '
+	PROMPT='${RETVAL_STR}[%F{cyan}%n%f@%m : %(4~|.../%3~|%~) %F{red}${GITBRANCH}%f${GITINFO}] $ '
 }
 
 setprompt
