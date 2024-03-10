@@ -27,9 +27,23 @@ unsetopt beep notify
 bindkey -e
 # End of lines configured by zsh-newuser-install
 
+if [ -e '/usr/share/fzf/key-bindings.zsh' ] && [ -e '/usr/share/fzf/completion.zsh' ]; then
+    source /usr/share/fzf/key-bindings.zsh
+    source /usr/share/fzf/completion.zsh
+fi
+
 # aliases
+alias ip="ip --color"
 alias ls="ls --color=auto"
 alias grep="grep --color=auto"
+alias gitrs="git --recurse-submodules"
+alias hx=helix
+
+function gradeparse { ./gradeparse.py -g $1 t$2*; }
+alias gp="gradeparse --notalk"
+alias gpt="gradeparse \"\""
+
+export HOSTNAME_COLOR=${HOSTNAME_COLOR:-cyan}
 
 function precmd() {
 	RETVAL=$?
@@ -37,7 +51,7 @@ function precmd() {
 	GITINFO=''
 
 	if type git 2> /dev/null 1> /dev/null && git rev-parse 2> /dev/null 1> /dev/null ; then
-		GITBRANCH="$(git rev-parse --abbrev-ref HEAD)($(git rev-parse --short HEAD))"
+		GITBRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)($(git rev-parse --short HEAD 2>/dev/null))"
 
 		if [[ -n $(git status --short) ]]; then
                         GITINFO="*"
@@ -54,7 +68,7 @@ function precmd() {
 setprompt () {
 	setopt prompt_subst
 
-	PROMPT='${RETVAL_STR}[%F{cyan}%n%f@%m : %(4~|.../%3~|%~) %F{red}${GITBRANCH}%f${GITINFO}] $ '
+	PROMPT='${RETVAL_STR}[%F{$HOSTNAME_COLOR}%n%f@%m : %(4~|.../%3~|%~) %F{red}${GITBRANCH}%f${GITINFO}] $ '
 }
 
 setprompt
