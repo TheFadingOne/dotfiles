@@ -23,7 +23,7 @@ vim.opt.background = 'dark'
 vim.opt.backspace = 'indent,eol,start'
 vim.opt.backup = true -- make sure if I want that
 vim.opt.backupcopy = 'yes'
-vim.opt.backupdir = '.,' .. os.getenv('XDG_DATA_HOME') .. '/nvim/.backup'
+vim.opt.backupdir = os.getenv('XDG_DATA_HOME') .. '/nvim/.backup,.'
 vim.opt.backupext = '~'
 vim.opt.breakindent = true
 vim.opt.bufhidden = '' -- maybe change this?
@@ -46,11 +46,31 @@ vim.opt.wrap = true
 
 vim.cmd(':filetype on')
 
+-- hilighting
+vim.api.nvim_set_hl(0, 'NormalFloat', { ctermbg = 8 })
+
 -- nvim-cmp capabilities
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
+-- Using Lua functions
+local builtin = require('telescope.builtin')
+local tkmopts = { noremap = true }
+vim.keymap.set('n', '<leader>ff', builtin.find_files, tkmopts)
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, tkmopts)
+vim.keymap.set('n', '<leader>fb', builtin.buffers, tkmopts)
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, tkmopts)
 
 -- lsp-config
+
+-- Global mappings.
+-- See `:help vim.diagnostic.*` for documentation on any of the below functions
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
+
+
 local on_attach = function(client, bufnr)
   -- Enable completion triggered by <c-x><c-o>
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
@@ -78,80 +98,123 @@ end
 local lspconfig = require('lspconfig')
 local util = require('lspconfig.util')
 
-lspconfig['clangd'].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    cmd = { 'clangd' },
-    filetype = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
-    root_dir = util.root_pattern('.clangd',
-                                 '.clang-tidy',
-                                 '.clang-format',
-                                 'compile_commands.json',
-                                 'compile_flags.txt',
-                                 'configure.ac',
-                                 '.git'),
-}
+-- lspconfig['ccls'].setup {
+--     on_attach = on_attach,
+--     capabilities = capabilities,
+--     init_options = {
+--         compilationDatabaseDirectory = "build",
+--         index = {
+--             threads = 0;
+--         },
+--         clang = {
+--             excludeArgs = { "-frounding-math" },
+--         },
+--     },
+--     cmd = { 'ccls' },
+--     filetype = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+--     offset_encoding = "utf-32",
+--     root_dir = util.root_pattern('compile_commands.json', '.ccls', '.git'),
+--     single_file_support = false,
+-- }
 
-lspconfig['gopls'].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    cmd = { 'gopls' },
-    filetype = { 'go', 'gomod', 'gotmpl' },
-    root_dir = util.root_pattern('go.mod', '.git'),
-    single_file_support = true,
-}
+local clangd_cmd = 'clangd'
+if vim.fn.executable(clangd_cmd) == 1 then
+    lspconfig['clangd'].setup {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        cmd = { clangd_cmd },
+        filetype = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+        root_dir = util.root_pattern('.clangd',
+                                     '.clang-tidy',
+                                     '.clang-format',
+                                     'compile_commands.json',
+                                     'compile_flags.txt',
+                                     'configure.ac',
+                                     '.git'),
+    }
+end
 
+local gopls_cmd = 'gopls'
+if vim.fn.executable(gopls_cmd) == 1 then
+    lspconfig['gopls'].setup {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        cmd = { gopls_cmd },
+        filetype = { 'go', 'gomod', 'gotmpl' },
+        root_dir = util.root_pattern('go.mod', '.git'),
+        single_file_support = true,
+    }
+end
 
-lspconfig['hls'].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    cmd = { 'haskell-language-server-wrapper', '--lsp' },
-    filetype = { 'haskell', 'lhaskell' },
-    root_dir = function (filepath)
-        return (
-            util.root_pattern('hie.yaml', 'stack.yaml', 'cabal.project')(filepath)
-            or util.root_pattern('*.cabal', 'package.yaml')(filepath)
-        )
-    end,
-    settings = {
-        haskell = {
-            formattingProvider = 'ormulo'
-        }
-    },
-    single_file_support = true,
-}
-
-lspconfig['rust_analyzer'].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    cmd = { 'rust-analyzer' },
-    filetype = { 'rust' },
-    root_dir = util.root_pattern('Cargo.toml', 'rust-project.json'),
-    settings = {
-        ['rust-analyzer'] = {}
-    },
-}
-
-lspconfig['sumneko_lua'].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    settings = {
-        Lua = {
-            runtime = {
-                version = 'LuaJIT',
-            },
-            diagnostics = {
-                globals = {'vim'},
-            },
-            workspace = {
-                library = vim.api.nvim_get_runtime_file("", true),
-            },
-            telemetry = {
-                enable = false,
-            },
+local hls_cmd = 'haskell-language-server-wrapper'
+if vim.fn.executable(hls_cmd) == 1 then
+    lspconfig['hls'].setup {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        cmd = { hls_cmd, '--lsp' },
+        filetype = { 'haskell', 'lhaskell' },
+        root_dir = function (filepath)
+            return (
+                util.root_pattern('hie.yaml', 'stack.yaml', 'cabal.project')(filepath)
+                or util.root_pattern('*.cabal', 'package.yaml')(filepath)
+            )
+        end,
+        settings = {
+            haskell = {
+                formattingProvider = 'ormulo'
+            }
         },
-    },
-}
+        single_file_support = true,
+    }
+end
+
+local pylsp_cmd = 'pylsp'
+if vim.fn.executable(pylsp_cmd) == 1 then
+    lspconfig['pylsp'].setup {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        cmd = { pylsp_cmd },
+        filetypes = { 'python' },
+        root_dir = function(fname)
+          local root_files = {
+            'pyproject.toml',
+            'setup.py',
+            'setup.cfg',
+            'requirements.txt',
+            'Pipfile',
+          }
+          return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname)
+        end,
+        single_file_support = true,
+    }
+end
+
+local rust_analyzer_cmd = 'rust_analyzer'
+if vim.fn.executable(rust_analyzer_cmd) == 1 then
+    lspconfig['rust_analyzer'].setup {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        cmd = { rust_analyzer_cmd },
+        filetype = { 'rust' },
+        root_dir = util.root_pattern('Cargo.toml', 'rust-project.json'),
+        settings = {
+            ['rust-analyzer'] = {}
+        },
+    }
+end
+
+local lua_cmd = 'lua_language_server'
+if vim.fn.executable(lua_cmd) == 1 then
+    lspconfig['lua_ls'].setup {
+        on_attach,
+        capabilities,
+        cmd = { 'lua_language_server' },
+        filetype = { 'lua' },
+        log_level = 2,
+        root_dir = util.root_pattern(".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git"),
+        single_file_support = true,
+    }
+end
 
 -- setup snippet engine
 local luasnip = require('luasnip')
