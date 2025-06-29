@@ -16,5 +16,28 @@ return require('packer').startup(function(use)
     use {
         'nvim-telescope/telescope.nvim', tag = '0.1.4',
         requires = { {'nvim-lua/plenary.nvim'} }
+    } -- File searching
+    use {
+        'Julian/lean.nvim',
+        requires = { {'nvim-lua/plenary.nvim'} }
+    } -- lean stuff
+    use "sindrets/diffview.nvim" -- git diff view
+    use {
+        "catppuccin/nvim",
+        as = "catppuccin"
+    }
+
+    -- isabelle
+    use 'Treeniks/isabelle-syn.nvim'
+    use {
+        'Treeniks/isabelle-lsp.nvim',
+        branch = 'isabelle-language-server',
+        requires = { {'neovim/nvim-lspconfig'} }
+    }
+
+    -- devcontainer
+    use {
+        'https://codeberg.org/esensar/nvim-dev-container',
+        requires = { {'nvim-treesitter/nvim-treesitter'} }
     }
 end)
