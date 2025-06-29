@@ -20,9 +20,9 @@ compinit
 # End of lines added by compinstall
 # Lines configured by zsh-newuser-install
 HISTFILE=~/.histfile
-HISTSIZE=10000
-SAVEHIST=10000
-setopt autocd extendedglob nomatch
+HISTSIZE=200000
+SAVEHIST=200000
+setopt autocd extendedglob nomatch hist_ignore_all_dups
 unsetopt beep notify
 bindkey -e
 # End of lines configured by zsh-newuser-install
@@ -42,6 +42,8 @@ alias hx=helix
 function gradeparse { ./gradeparse.py -g $1 t$2*; }
 alias gp="gradeparse --notalk"
 alias gpt="gradeparse \"\""
+
+source ~/.config/user-dirs.dirs
 
 export HOSTNAME_COLOR=${HOSTNAME_COLOR:-cyan}
 
